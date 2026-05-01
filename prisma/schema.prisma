@@ -3,19 +3,28 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// Roles: "ADMIN" or "MEMBER"
-// Status: "TODO", "IN_PROGRESS", "REVIEW", "DONE"
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
 
 model User {
   id             String    @id @default(cuid())
   name           String?
   email          String    @unique
   password       String
-  role           String    @default("MEMBER")
+  role           Role      @default(MEMBER)
   ownedProjects  Project[] @relation("ProjectOwner")
   projects       Project[] @relation("ProjectMembers")
   tasks          Task[]
@@ -38,7 +47,7 @@ model Task {
   id          String    @id @default(cuid())
   title       String
   description String?
-  status      String    @default("TODO")
+  status      Status    @default(TODO)
   dueDate     DateTime?
   projectId   String
   project     Project   @relation(fields: [projectId], references: [id])
